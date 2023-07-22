@@ -64,21 +64,35 @@ def extract_data(driver):
         driver.get(df['url'][i])
         time.sleep(2)
 
-        #ASIN
         try:
-            asin.append(driver.find_element(By.XPATH,'//ul[@class="a-unordered-list a-nostyle a-vertical a-spacing-none detail-bullet-list"]').text.split('\n')[3].split(':')[-1])
+            l = driver.find_element(By.XPATH,'//ul[@class="a-unordered-list a-nostyle a-vertical a-spacing-none detail-bullet-list"]').text.split('\n')
+
+            #ASIN
+            temp_asin = 'No ASIN'
+            for i in l:
+                if i.startswith('ASIN'):
+                    temp_asin = i.split(':')[-1]
+                    break
+            asin.append(temp_asin)
+
+            #Manufacturer
+            temp_manf = 'No manufacturer'
+            for i in l:
+                if i.startswith('Manufacturer'):
+                    temp_manf = i.split(':')[-1]
+                    break
+            manufacturer.append(temp_manf)
         except:
             asin.append('No ASIN')
-
-        #Manufacturer
-        try:
-            manufacturer.append(driver.find_element(By.XPATH,'//ul[@class="a-unordered-list a-nostyle a-vertical a-spacing-none detail-bullet-list"]').text.split('\n')[2].split(':')[-1])
-        except:
             manufacturer.append('No manufacturer')
 
         #Product description
         try:
-            product_description.append(driver.find_element(By.XPATH,'.//div[@id="productDescription"]').text)
+            temp = driver.find_element(By.XPATH,'.//div[@id="productDescription"]').text
+            if temp == '':
+                product_description.append('No product description')
+            else:
+                product_description.append(temp)
         except:
             product_description.append('No product description')
 
@@ -87,7 +101,6 @@ def extract_data(driver):
             description.append(driver.find_element(By.XPATH,'.//div[@id="featurebullets_feature_div"]').text)
         except:
             description.append('No description')
-
     df1 = pd.DataFrame({'asin':asin,'manufacturer':manufacturer,'product_description':product_description,'description':description})
   
     df2 = pd.concat([df,df1],axis=1)
