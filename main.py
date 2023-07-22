@@ -34,16 +34,22 @@ def extract_data(driver):
     for page in tqdm(range(19), desc="Pages", unit="page"):
         time.sleep(2)
         for product in range(len(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]'))):
+
+            #URL
             url.append(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]')[product].find_element(By.XPATH,'.//h2/a').get_attribute('href'))
+            #Name
             name.append(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]')[product].find_element(By.XPATH,'.//h2/a').text)
+            #Rating
             try:
                 rating.append(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]')[product].find_elements(By.XPATH,'.//div[@class="a-row a-size-small"]/span')[0].get_attribute('aria-label').split()[0])
             except:
                 rating.append('No rating')
+            #Number of reviews
             try:
                 number_of_reviews.append(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]')[product].find_elements(By.XPATH,'.//div[@class="a-row a-size-small"]/span')[1].get_attribute('aria-label'))
             except:
                 number_of_reviews.append('No reviews')
+            #Price
             try:
                 price.append(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]')[product].find_element(By.XPATH,'.//div[@class="a-row a-size-base a-color-base"]').text.split()[0])
             except:
