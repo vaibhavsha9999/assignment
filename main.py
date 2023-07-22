@@ -2,19 +2,25 @@ from selenium import webdriver
 import pandas as pd
 from selenium.webdriver.common.by import By
 import time
-
-
+from tqdm import tqdm
+import time
 
 
 
 def initialze_driver():
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
-    chrome_options.headless = True
-    driver = webdriver.Chrome('chromedriver',options=chrome_options)
+    driver=webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=options)
     return driver
 
+
+
 def extract_data(driver):
+
+    url='https://www.amazon.in/s?k=bags&crid=2M096C61O4MLT&qid=1653308124&sprefix=ba%2Caps%2C283&ref=sr_pg_1'
+    driver.get(url)
+
     url = []
     name = []
     price= []
@@ -25,10 +31,7 @@ def extract_data(driver):
     manufacturer = []
     description = []
 
-    url='https://www.amazon.in/s?k=bags&crid=2M096C61O4MLT&qid=1653308124&sprefix=ba%2Caps%2C283&ref=sr_pg_1'
-    driver.get(url)
-
-    for page in range(19):
+    for page in tqdm(range(19), desc="Pages", unit="page"):
         time.sleep(2)
         for product in range(len(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]'))):
             url.append(driver.find_elements(By.XPATH,'//div[@data-component-type="s-search-result"]')[product].find_element(By.XPATH,'.//h2/a').get_attribute('href'))
@@ -51,7 +54,7 @@ def extract_data(driver):
  
     df = pd.DataFrame({'url':url,'name':name,'price':price,'rating':rating,'number_of_reviews':number_of_reviews})
 
-    for i in range(len(df['url'])):
+    for i in tqdm(range(len(df['url'])), desc="Processing URLs", unit="URL"):
         driver.get(df['url'][i])
         time.sleep(2)
 
@@ -89,4 +92,5 @@ if __name__ == '__main__':
     driver = initialze_driver()
     df = extract_data(driver)
     df.to_csv('amazon.csv',index=False)
+    driver.quit()
     
